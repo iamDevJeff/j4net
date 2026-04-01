@@ -567,7 +567,7 @@
         if (phoneRegex.test(phoneInput.value)) {
           const packageName = form.dataset.package;
           const amount = form.dataset.amount;
-          showModal(`J4Net Payment Solutions: Payment of KSH ${amount} for ${packageName} Confirmed! Check ${phoneInput.value} for M-Pesa prompt.`);
+          showModal(`Infinet Payment Solutions: Payment of KSH ${amount} for ${packageName} Confirmed! Check ${phoneInput.value} for M-Pesa prompt.`);
           form.reset();
         } else {
           alert('Please enter a valid Kenyan phone number (e.g., 07... or +254...)');
@@ -589,6 +589,40 @@
     window.addEventListener('click', (e) => {
       if (e.target === modal) modal.style.display = 'none';
     });
+
+    fetch("/api/pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone: phoneInput.value,
+        package: packageName
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        showModal("Check your phone for M-Pesa prompt");
+      });
+
+
+    // additional 
+    document.querySelectorAll('.payment-form').forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const phone = form.querySelector('input[name="phone"]').value;
+        const amount = form.dataset.amount; // Gets 1000, 1500, etc. from data-amount
+
+        const response = await fetch('http://127.0.0.1:5000/pay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phone, amount: amount })
+        });
+
+        const result = await response.json();
+        alert(result.CustomerMessage || "STK Push Sent! Check your phone.");
+      });
+    });
+  </script>
   </script>
 </body>
 
